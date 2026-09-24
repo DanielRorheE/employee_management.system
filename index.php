@@ -1,30 +1,36 @@
 <?php
+
 include "db.php";
 
-$result = $conn->query("SELECT * FROM employees ORDER BY id DESC");
+$totalEmployees = $conn->query(
+    "SELECT COUNT(*) AS total FROM employees"
+)->fetch_assoc()['total'];
 
-$message = "";
+$totalDepartments = $conn->query(
+    "SELECT COUNT(DISTINCT department) AS total FROM employees"
+)->fetch_assoc()['total'];
 
-if (isset($_GET['message'])) {
-    $message = $_GET['message'];
-}
+$totalPositions = $conn->query(
+    "SELECT COUNT(DISTINCT position) AS total FROM employees"
+)->fetch_assoc()['total'];
+
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Employee Management System</title>
+        <title>Dashboard</title>
 
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+        >
 
-    <link rel="stylesheet" href="assets/style.css">
-</head>
+        <link rel="stylesheet" href="assets/style.css">
+    </head>
 
 <body>
 
@@ -36,128 +42,58 @@ if (isset($_GET['message'])) {
     </div>
 </nav>
 
-<div class="container mt-5">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2>Employee Records</h2>
-            <p class="text-secondary mb-0">
-                Manage employee information
-            </p>
-        </div>
+ <div class="container mt-5"> 
+    <div class="text-center mb-5"> 
+        <h1>Dashboard</h1> 
+        
+        <p class="text-secondary"> 
+            Overview of employee records, departments, and positions.
+        </p> 
+    </div> 
+    
 
-        <a href="add_employee.php" class="btn btn-metal">
-            + Add Employee
-        </a>
-    </div>
+    <div class="row g-4 mb-5"> 
 
-    <?php if ($message != ""): ?>
+            <div class="col-md-4"> 
+                <div class="card metallic-card h-100 text-center"> 
+                    <div class="card-body"> 
+                       <h5 class="card-title"> Total Employees </h5> 
+                       <h2 class="display-5 fw-bold"> <?= $totalEmployees ?> </h2> 
+                    </div> 
+                </div> 
+            </div> 
+    
 
-        <div class="alert alert-success alert-dismissible fade show">
-            <?= htmlspecialchars($message) ?>
+            <div class="col-md-4"> 
+                <div class="card metallic-card h-100 text-center"> 
+                    <div class="card-body"> <h5 class="card-title"> Departments </h5> 
+                    <h2 class="display-5 fw-bold"> <?= $totalDepartments ?> </h2> 
+                </div> 
+            </div> 
+        </div> 
 
-            <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="alert">
-            </button>
-        </div>
 
-    <?php endif; ?>
+            <div class="col-md-4"> 
+                <div class="card metallic-card h-100 text-center"> 
+                    <div class="card-body"> 
+                        <h5 class="card-title"> Positions </h5> 
+                        <h2 class="display-5 fw-bold"> <?= $totalPositions ?> </h2> 
+                    </div> 
+                </div> 
+            </div> 
+        </div> 
 
-    <div class="card metallic-card">
 
-        <div class="card-body">
-
-            <div class="table-responsive">
-
-                <table class="table table-hover align-middle">
-
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Full Name</th>
-                            <th>Position</th>
-                            <th>Email</th>
-                            <th>Department</th>
-                            <th class="text-center">Actions</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                    <?php if ($result->num_rows > 0): ?>
-
-                        <?php while ($employee = $result->fetch_assoc()): ?>
-
-                            <tr>
-
-                                <td>
-                                    <?= $employee['id'] ?>
-                                </td>
-
-                                <td>
-                                    <strong>
-                                        <?= htmlspecialchars($employee['full_name']) ?>
-                                    </strong>
-                                </td>
-
-                                <td>
-                                    <?= htmlspecialchars($employee['position']) ?>
-                                </td>
-
-                                <td>
-                                    <?= htmlspecialchars($employee['email']) ?>
-                                </td>
-
-                                <td>
-                                    <span class="department-badge">
-                                        <?= htmlspecialchars($employee['department']) ?>
-                                    </span>
-                                </td>
-
-                                <td class="text-center">
-
-                                    <a
-                                        href="edit_employee.php?id=<?= $employee['id'] ?>"
-                                        class="btn btn-sm btn-outline-dark">
-                                        Edit
-                                    </a>
-
-                                    <a
-                                        href="delete_employee.php?id=<?= $employee['id'] ?>"
-                                        class="btn btn-sm btn-danger"
-                                        onclick="return confirm('Are you sure you want to delete this employee?');">
-                                        Delete
-                                    </a>
-
-                                </td>
-
-                            </tr>
-
-                        <?php endwhile; ?>
-
-                    <?php else: ?>
-
-                        <tr>
-                            <td colspan="6" class="text-center py-4">
-                                No employee records found.
-                            </td>
-                        </tr>
-
-                    <?php endif; ?>
-
-                    </tbody>
-
-                </table>
-
+            <div class="text-center"> 
+                <h3 class="mb-3"> Quick Actions </h3>
+                    <div class="d-flex justify-content-center flex-wrap gap-3"> 
+                        <a href="add_employee.php" class="btn btn-metal px-4"> + Add Employee </a> 
+                        <a href="edit_employee.php" class="btn btn-outline-dark px-4"> Edit Employee </a> 
+                        <a href="records_employee.php" class="btn btn-outline-dark px-4"> View Employees </a> 
+                    </div> 
+                </div> 
             </div>
-
-        </div>
-
-    </div>
-
-</div>
 
 <footer class="text-center mt-5 mb-4 text-secondary">
     Employee Management System &copy; 2026
@@ -168,4 +104,4 @@ if (isset($_GET['message'])) {
 </script>
 
 </body>
-</html>
+

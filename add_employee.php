@@ -136,11 +136,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     Position *
                 </label>
 
-                <input
-                    type="text"
+                <select
                     name="position"
-                    class="form-control"
+                    class="form-select"
                     required>
+
+                    <option value="">
+                        Select Position
+                    </option>
+
+                    <option value="CEO">
+                        CEO
+                    </option>
+
+                    <option value="Manager">
+                        Manager
+                    </option>
+
+                    <option value="Supervisor">
+                        Supervisor
+                    </option>
+
+                    <option value="Senior Staff">
+                        Senior Staff
+                    </option>
+
+                    <option value="Staff">
+                        Staff
+                    </option>
+
+                    <option value="Intern">
+                        Intern
+                    </option>
+
+                </select>
 
             </div>
 
@@ -173,24 +202,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         Select Department
                     </option>
 
-                    <option value="IT">
-                        IT
+                    <option value="Information Technology (IT)">
+                        Information Technology (IT)
                     </option>
 
-                    <option value="Human Resources">
-                        Human Resources
+                    <option value="Human Resources (HR)">
+                        Human Resources (HR)
                     </option>
 
-                    <option value="Finance">
-                        Finance
+                    <option value="Finance & Accounting">
+                        Finance & Accounting
                     </option>
 
-                    <option value="Marketing">
-                        Marketing
+                    <option value="Sales & Marketing">
+                        Sales & Marketing
                     </option>
 
                     <option value="Operations">
                         Operations
+                    </option>
+
+                    <option value="Customer Service">
+                        Customer Service
                     </option>
 
                 </select>

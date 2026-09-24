@@ -3,7 +3,7 @@
 include "db.php";
 
 if (!isset($_GET["id"]) || !is_numeric($_GET["id"])) {
-    header("Location: index.php");
+    header("Location: records_employee.php");
     exit();
 }
 
@@ -18,14 +18,14 @@ $stmt->bind_param("i", $id);
 if ($stmt->execute()) {
 
     header(
-        "Location: index.php?message=" .
+        "Location: records_employee.php?message=" .
         urlencode("Employee deleted successfully!")
     );
 
 } else {
 
     header(
-        "Location: index.php?message=" .
+        "Location: records_employee.php?message=" .
         urlencode("Unable to delete employee.")
     );
 

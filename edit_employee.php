@@ -2,7 +2,7 @@
 include "db.php";
 
 if (!isset($_GET["id"]) || !is_numeric($_GET["id"])) {
-    header("Location: index.php");
+    header("Location: manage_employee.php");
     exit();
 }
 
@@ -18,7 +18,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows == 0) {
-    header("Location: index.php");
+    header("Location: manage_employee.php");
     exit();
 }
 
@@ -69,7 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($update->execute()) {
 
             header(
-                "Location: index.php?message=" .
+                "Location: manage_employee.php?message=" .
                 urlencode("Employee updated successfully!")
             );
 
@@ -162,13 +162,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     Position *
                 </label>
 
-                <input
-                    type="text"
+                <select
                     name="position"
-                    class="form-control"
-                    value="<?= htmlspecialchars($employee['position']) ?>"
+                    class="form-select"
                     required>
 
+                    <?php 
+                    $positions = [ 
+                        "CEO", 
+                        "Manager", 
+                        "Supervisor", 
+                        "Senior Staff", 
+                        "Staff", 
+                        "Intern" 
+                        ]; ?> 
+                        
+                    <?php foreach ($positions as $position): ?> 
+                        
+                        <option 
+                            value="<?= $position ?>"
+                             <?= $employee['position'] == $position ? 'selected' : '' ?>> 
+                             
+                             <?= $position ?>
+                         </option> 
+                         
+                    <?php endforeach; ?> 
+                </select> 
             </div>
 
             <div class="mb-3">
@@ -199,11 +218,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                     <?php
                     $departments = [
-                        "IT",
-                        "Human Resources",
-                        "Finance",
-                        "Marketing",
-                        "Operations"
+                        "Information Technology (IT)",
+                        "Human Resources (HR)",
+                        "Finance & Accounting",
+                        "Sales & Marketing",
+                        "Operations",
+                        "Customer Service"
                     ];
                     ?>
 
@@ -232,7 +252,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </button>
 
                 <a
-                    href="index.php"
+                    href="manage_employee.php"
                     class="btn btn-outline-secondary">
                     Cancel
                 </a>
