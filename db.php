@@ -15,6 +15,34 @@ try {
     die('Database connection failed: ' . $e->getMessage());
 }
 
+$conn->query("
+    CREATE TABLE IF NOT EXISTS employee_history (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        employee_id INT NULL,
+        full_name VARCHAR(150) NOT NULL,
+        action VARCHAR(50) NOT NULL,
+        details VARCHAR(255) NOT NULL DEFAULT '',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+");
+
+function log_employee_history($employeeId, $fullName, $action, $details = '') {
+    global $conn;
+
+    $stmt = $conn->prepare(
+        "INSERT INTO employee_history (employee_id, full_name, action, details, created_at)
+         VALUES (?, ?, ?, ?, NOW())"
+    );
+
+    $bindName = trim((string) $fullName);
+    $bindAction = trim((string) $action);
+    $bindDetails = trim((string) $details);
+
+    $stmt->bind_param("isss", $employeeId, $bindName, $bindAction, $bindDetails);
+    $stmt->execute();
+    $stmt->close();
+}
+
 function getPDO(): PDO {
     global $host, $database, $username, $password, $charset;
 

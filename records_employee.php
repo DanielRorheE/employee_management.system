@@ -4,6 +4,7 @@ include "db.php";
 $message = "";
 $search = trim($_GET['search'] ?? "");
 $departmentFilter = trim($_GET['department'] ?? "");
+$deletedId = isset($_GET['deleted_id']) && is_numeric($_GET['deleted_id']) ? intval($_GET['deleted_id']) : null;
 
 if (isset($_GET['message'])) {
     $message = $_GET['message'];
@@ -109,8 +110,13 @@ $departmentOptions = $conn->query("SELECT DISTINCT department FROM employees WHE
 
     <?php if ($message != ""): ?>
 
-        <div class="alert alert-success alert-dismissible fade show">
-            <?= htmlspecialchars($message) ?>
+        <div class="alert alert-success alert-dismissible fade show d-flex align-items-center justify-content-between gap-3">
+            <div>
+                <?= htmlspecialchars($message) ?>
+                <?php if ($deletedId !== null): ?>
+                    <a href="undo_delete.php?id=<?= $deletedId ?>" class="btn btn-sm btn-outline-success ms-2">Undo</a>
+                <?php endif; ?>
+            </div>
 
             <button
                 type="button"
@@ -143,12 +149,13 @@ $departmentOptions = $conn->query("SELECT DISTINCT department FROM employees WHE
 
                     <?php if ($result->num_rows > 0): ?>
 
+                        <?php $rowNumber = 1; ?>
                         <?php while ($employee = $result->fetch_assoc()): ?>
 
                             <tr>
 
                                 <td>
-                                    <?= $employee['id'] ?>
+                                    <?= $rowNumber ?>
                                 </td>
 
                                 <td>
@@ -172,6 +179,8 @@ $departmentOptions = $conn->query("SELECT DISTINCT department FROM employees WHE
                                 </td>
 
                             </tr>
+
+                            <?php $rowNumber++; ?>
 
                         <?php endwhile; ?>
 

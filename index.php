@@ -18,6 +18,10 @@ $recentEmployees = $conn->query(
     "SELECT full_name, position, department FROM employees WHERE deleted_at IS NULL ORDER BY id DESC LIMIT 5"
 );
 
+$recentActivity = $conn->query(
+    "SELECT * FROM employee_history ORDER BY created_at DESC LIMIT 6"
+);
+
 ?>
 
 <!DOCTYPE html>
@@ -120,10 +124,10 @@ $recentEmployees = $conn->query(
                         </div>
 
                         <div class="col-md-6">
-                            <a href="index.php" class="quick-action text-center">
-                                <div class="quick-action-icon">🏠</div>
-                                <h5 class="mb-1">Dashboard</h5>
-                                <small class="text-secondary">Back to overview</small>
+                            <a href="history.php" class="quick-action text-center">
+                                <div class="quick-action-icon">🕘</div>
+                                <h5 class="mb-1">History</h5>
+                                <small class="text-secondary">View recent activity</small>
                             </a>
                         </div>
                     </div>
@@ -134,14 +138,26 @@ $recentEmployees = $conn->query(
         <div class="col-md-4">
             <div class="card metallic-card h-100">
                 <div class="card-body">
-                    <h3 class="section-title mb-3">Recent Employees</h3>
+                    <h3 class="section-title mb-3">Recent Activity</h3>
                     <ul class="list-group list-group-flush">
-                        <?php while ($employee = $recentEmployees->fetch_assoc()): ?>
-                            <li class="list-group-item px-0">
-                                <strong><?= htmlspecialchars($employee['full_name']) ?></strong><br>
-                                <small class="text-secondary"><?= htmlspecialchars($employee['position']) ?> • <?= htmlspecialchars($employee['department']) ?></small>
-                            </li>
-                        <?php endwhile; ?>
+                        <?php if ($recentActivity->num_rows > 0): ?>
+                            <?php while ($activity = $recentActivity->fetch_assoc()): ?>
+                                <li class="list-group-item px-0">
+                                    <div class="d-flex justify-content-between align-items-start gap-3">
+                                        <div>
+                                            <strong><?= htmlspecialchars($activity['full_name']) ?></strong><br>
+                                            <small class="text-secondary"><?= ucfirst(htmlspecialchars($activity['action'])) ?> • <?= htmlspecialchars($activity['details']) ?></small>
+                                        </div>
+                                        <small class="text-secondary text-nowrap">
+                                            <?= date('M j', strtotime($activity['created_at'])) ?><br>
+                                            <?= date('g:i A', strtotime($activity['created_at'])) ?>
+                                        </small>
+                                    </div>
+                                </li>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <li class="list-group-item px-0 text-secondary">No recent activity yet.</li>
+                        <?php endif; ?>
                     </ul>
                 </div>
             </div>

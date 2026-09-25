@@ -36,6 +36,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $stmt->bind_param("ssss", $full_name, $position, $email, $department);
 
             if ($stmt->execute()) {
+                $employeeId = $stmt->insert_id;
+                log_employee_history($employeeId, $full_name, 'added', 'Employee added to the system');
                 header("Location: manage_employee.php?message=" . urlencode("Employee added successfully!"));
                 exit();
             }
