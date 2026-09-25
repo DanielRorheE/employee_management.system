@@ -8,10 +8,7 @@ if (!isset($_GET["id"]) || !is_numeric($_GET["id"])) {
 
 $id = intval($_GET["id"]);
 
-$stmt = $conn->prepare(
-    "SELECT * FROM employees WHERE id = ?"
-);
-
+$stmt = $conn->prepare("SELECT * FROM employees WHERE id = ? AND deleted_at IS NULL LIMIT 1");
 $stmt->bind_param("i", $id);
 $stmt->execute();
 
@@ -26,59 +23,48 @@ $employee = $result->fetch_assoc();
 
 $error = "";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    $full_name = trim($_POST["full_name"]);
-    $position = trim($_POST["position"]);
-    $email = trim($_POST["email"]);
-    $department = trim($_POST["department"]);
+    $full_name = trim($_POST["full_name"] ?? "");
+    $position = trim($_POST["position"] ?? "");
+    $email = strtolower(trim($_POST["email"] ?? ""));
+    $department = trim($_POST["department"] ?? "");
 
     if (
-        empty($full_name) ||
-        empty($position) ||
-        empty($email) ||
-        empty($department)
+        $full_name === "" ||
+        $position === "" ||
+        $email === "" ||
+        $department === ""
     ) {
-
         $error = "Please fill in all required fields.";
-
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-
         $error = "Please enter a valid email address.";
-
     } else {
+        $existing = $conn->prepare("SELECT id FROM employees WHERE email = ? AND id != ? AND deleted_at IS NULL LIMIT 1");
+        $existing->bind_param("si", $email, $id);
+        $existing->execute();
+        $existingResult = $existing->get_result();
 
-        $update = $conn->prepare(
-            "UPDATE employees
-             SET full_name = ?,
-                 position = ?,
-                 email = ?,
-                 department = ?
-             WHERE id = ?"
-        );
-
-        $update->bind_param(
-            "ssssi",
-            $full_name,
-            $position,
-            $email,
-            $department,
-            $id
-        );
-
-        if ($update->execute()) {
-
-            header(
-                "Location: manage_employee.php?message=" .
-                urlencode("Employee updated successfully!")
+        if ($existingResult->num_rows > 0) {
+            $error = "This email address is already in use.";
+        } else {
+            $update = $conn->prepare(
+                "UPDATE employees
+                 SET full_name = ?,
+                     position = ?,
+                     email = ?,
+                     department = ?
+                 WHERE id = ?"
             );
 
-            exit();
+            $update->bind_param("ssssi", $full_name, $position, $email, $department, $id);
 
-        } else {
+            if ($update->execute()) {
+                header("Location: manage_employee.php?message=" . urlencode("Employee updated successfully!"));
+                exit();
+            }
 
             $error = "Unable to update employee.";
-
         }
     }
 }
