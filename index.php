@@ -40,8 +40,9 @@ $recentEmployees = $conn->query(
 
 <nav class="navbar navbar-dark metallic-navbar">
     <div class="container d-flex justify-content-between align-items-center">
-        <a href="index.php" class="navbar-brand mb-0 h1">
-            Employee Management System
+        <a href="index.php" class="navbar-brand-wrap navbar-brand mb-0 h1">
+            <span class="navbar-logo" aria-label="smile logo">☺</span>
+            <span>Employee Management System</span>
         </a>
         <button id="themeToggle" class="theme-toggle" type="button">🌙 Dark</button>
     </div>
@@ -115,22 +116,6 @@ $recentEmployees = $conn->query(
                                 <div class="quick-action-icon">📄</div>
                                 <h5 class="mb-1">View Records</h5>
                                 <small class="text-secondary">Check employee list</small>
-                            </a>
-                        </div>
-
-                        <div class="col-md-6">
-                            <a href="leave.php" class="quick-action text-center">
-                                <div class="quick-action-icon">🗓️</div>
-                                <h5 class="mb-1">Leave Requests</h5>
-                                <small class="text-secondary">Approve or reject leave</small>
-                            </a>
-                        </div>
-
-                        <div class="col-md-6">
-                            <a href="payroll.php" class="quick-action text-center">
-                                <div class="quick-action-icon">💰</div>
-                                <h5 class="mb-1">Payroll</h5>
-                                <small class="text-secondary">Create and process pays</small>
                             </a>
                         </div>
 

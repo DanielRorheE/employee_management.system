@@ -76,37 +76,37 @@ $departmentOptions = $conn->query("SELECT DISTINCT department FROM employees WHE
 
 <div class="container mt-5">
 
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div class="mb-4">
         <div>
             <h2>Manage Employee Records</h2>
             <p class="text-secondary mb-0">
                 Manage employee information
             </p>
         </div>
+    </div>
 
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-            <form method="GET" class="d-flex search-box flex-wrap" action="manage_employee.php">
-                <input
-                    type="text"
-                    name="search"
-                    class="form-control"
-                    value="<?= htmlspecialchars($search) ?>"
-                    placeholder="Search employee"
-                >
-                <select name="department" class="form-select" style="max-width: 180px; border-radius: 0;">
-                    <option value="">All Departments</option>
-                    <?php while ($dept = $departmentOptions->fetch_assoc()): ?>
-                        <option value="<?= htmlspecialchars($dept['department']) ?>" <?= $departmentFilter === $dept['department'] ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($dept['department']) ?>
-                        </option>
-                    <?php endwhile; ?>
-                </select>
-                <button type="submit" class="btn btn-metal">Search</button>
-                <?php if ($search !== "" || $departmentFilter !== ""): ?>
-                    <a href="manage_employee.php" class="btn btn-outline-secondary">Clear</a>
-                <?php endif; ?>
-            </form>
-        </div>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch gap-3 mb-3">
+        <form method="GET" class="d-flex search-box flex-wrap" action="manage_employee.php">
+            <input
+                type="text"
+                name="search"
+                class="form-control"
+                value="<?= htmlspecialchars($search) ?>"
+                placeholder="Search employee"
+            >
+            <select name="department" class="form-select" style="max-width: 180px; border-radius: 0;">
+                <option value="">All Departments</option>
+                <?php while ($dept = $departmentOptions->fetch_assoc()): ?>
+                    <option value="<?= htmlspecialchars($dept['department']) ?>" <?= $departmentFilter === $dept['department'] ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($dept['department']) ?>
+                    </option>
+                <?php endwhile; ?>
+            </select>
+            <button type="submit" class="btn btn-metal">Search</button>
+            <?php if ($search !== "" || $departmentFilter !== ""): ?>
+                <a href="manage_employee.php" class="btn btn-outline-secondary">Clear</a>
+            <?php endif; ?>
+        </form>
     </div>
 
     <?php if ($message != ""): ?>
@@ -126,12 +126,6 @@ $departmentOptions = $conn->query("SELECT DISTINCT department FROM employees WHE
     <div class="card metallic-card">
 
         <div class="card-body">
-
-            <div class="page-actions">
-                <a href="add_employee.php" class="btn btn-metal">
-                    + Add Employee
-                </a>
-            </div>
 
             <div class="table-responsive">
 
@@ -221,7 +215,13 @@ $departmentOptions = $conn->query("SELECT DISTINCT department FROM employees WHE
 
     </div>
 
-    <div class="mt-4">
+    <div class="d-flex justify-content-end mt-3 mb-4">
+        <a href="add_employee.php" class="btn btn-metal">
+            + Add Employee
+        </a>
+    </div>
+
+    <div class="mt-2">
         <a href="index.php" class="btn btn-outline-secondary">
             ← Back to Dashboard
         </a>
