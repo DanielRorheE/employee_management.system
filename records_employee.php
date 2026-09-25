@@ -1,13 +1,50 @@
 <?php
 include "db.php";
 
-$result = $conn->query("SELECT * FROM employees ORDER BY id DESC");
-
 $message = "";
+$search = trim($_GET['search'] ?? "");
+$departmentFilter = trim($_GET['department'] ?? "");
 
 if (isset($_GET['message'])) {
     $message = $_GET['message'];
 }
+
+$conditions = ["deleted_at IS NULL"];
+$params = [];
+$types = "";
+
+if ($search !== "") {
+    $searchTerm = "%" . $conn->real_escape_string($search) . "%";
+    $conditions[] = "(full_name LIKE ? OR position LIKE ? OR email LIKE ? OR department LIKE ?)";
+    $params[] = $searchTerm;
+    $params[] = $searchTerm;
+    $params[] = $searchTerm;
+    $params[] = $searchTerm;
+    $types .= "ssss";
+}
+
+if ($departmentFilter !== "") {
+    $conditions[] = "department = ?";
+    $params[] = $departmentFilter;
+    $types .= "s";
+}
+
+$sql = "SELECT * FROM employees";
+if (!empty($conditions)) {
+    $sql .= " WHERE " . implode(" AND ", $conditions);
+}
+$sql .= " ORDER BY id DESC";
+
+if (!empty($params)) {
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+    $result = $stmt->get_result();
+} else {
+    $result = $conn->query($sql);
+}
+
+$departmentOptions = $conn->query("SELECT DISTINCT department FROM employees WHERE deleted_at IS NULL ORDER BY department ASC");
 ?>
 
 <!DOCTYPE html>
@@ -29,22 +66,45 @@ if (isset($_GET['message'])) {
 <body>
 
 <nav class="navbar navbar-dark metallic-navbar">
-    <div class="container">
-        <span class="navbar-brand mb-0 h1">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a href="index.php" class="navbar-brand mb-0 h1">
             Employee Management System
-        </span>
+        </a>
+        <button id="themeToggle" class="theme-toggle" type="button">🌙 Dark</button>
     </div>
 </nav>
 
 <div class="container mt-5">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
             <h2>Employee Records</h2>
             <p class="text-secondary mb-0">
                 View employee information and details.
             </p>
         </div>
+
+        <form method="GET" class="d-flex search-box flex-wrap" action="records_employee.php">
+            <input
+                type="text"
+                name="search"
+                class="form-control"
+                value="<?= htmlspecialchars($search) ?>"
+                placeholder="Search employees"
+            >
+            <select name="department" class="form-select" style="max-width: 180px; border-radius: 0;">
+                <option value="">All Departments</option>
+                <?php while ($dept = $departmentOptions->fetch_assoc()): ?>
+                    <option value="<?= htmlspecialchars($dept['department']) ?>" <?= $departmentFilter === $dept['department'] ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($dept['department']) ?>
+                    </option>
+                <?php endwhile; ?>
+            </select>
+            <button type="submit" class="btn btn-metal">Search</button>
+            <?php if ($search !== "" || $departmentFilter !== ""): ?>
+                <a href="records_employee.php" class="btn btn-outline-secondary">Clear</a>
+            <?php endif; ?>
+        </form>
     </div>
 
     <?php if ($message != ""): ?>
@@ -136,17 +196,35 @@ if (isset($_GET['message'])) {
     </div>
 
     <div class="mt-4">
-    <a href="index.php" class="btn btn-outline-secondary">
-        ← Back to Dashboard
-    </a>
-</div>
+        <a href="index.php" class="btn btn-outline-secondary">
+            ← Back to Dashboard
+        </a>
+    </div>
 
 </div>
 
-
+<footer class="page-footer text-center text-secondary">
+    Employee Management System &copy; 2026
+</footer>
 
 <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
+</script>
+<script>
+const body = document.body;
+const toggle = document.getElementById('themeToggle');
+
+if (localStorage.getItem('ems-theme') === 'dark') {
+    body.classList.add('dark-theme');
+    toggle.textContent = '☀️ Light';
+}
+
+toggle.addEventListener('click', () => {
+    body.classList.toggle('dark-theme');
+    const darkMode = body.classList.contains('dark-theme');
+    localStorage.setItem('ems-theme', darkMode ? 'dark' : 'light');
+    toggle.textContent = darkMode ? '☀️ Light' : '🌙 Dark';
+});
 </script>
 
 </body>

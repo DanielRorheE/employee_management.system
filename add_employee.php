@@ -3,58 +3,46 @@ include "db.php";
 
 $error = "";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    $full_name = trim($_POST["full_name"]);
-    $position = trim($_POST["position"]);
-    $email = trim($_POST["email"]);
-    $department = trim($_POST["department"]);
+    $full_name = trim($_POST["full_name"] ?? "");
+    $position = trim($_POST["position"] ?? "");
+    $email = strtolower(trim($_POST["email"] ?? ""));
+    $department = trim($_POST["department"] ?? "");
 
     if (
-        empty($full_name) ||
-        empty($position) ||
-        empty($email) ||
-        empty($department)
+        $full_name === "" ||
+        $position === "" ||
+        $email === "" ||
+        $department === ""
     ) {
-
         $error = "Please fill in all required fields.";
-
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-
         $error = "Please enter a valid email address.";
-
     } else {
+        $existing = $conn->prepare("SELECT id FROM employees WHERE email = ? AND deleted_at IS NULL LIMIT 1");
+        $existing->bind_param("s", $email);
+        $existing->execute();
+        $existingResult = $existing->get_result();
 
-        $stmt = $conn->prepare(
-            "INSERT INTO employees
-            (full_name, position, email, department)
-            VALUES (?, ?, ?, ?)"
-        );
-
-        $stmt->bind_param(
-            "ssss",
-            $full_name,
-            $position,
-            $email,
-            $department
-        );
-
-        if ($stmt->execute()) {
-
-            header(
-                "Location: index.php?message=" .
-                urlencode("Employee added successfully!")
+        if ($existingResult->num_rows > 0) {
+            $error = "This email address is already registered.";
+        } else {
+            $stmt = $conn->prepare(
+                "INSERT INTO employees (full_name, position, email, department, created_at)
+                 VALUES (?, ?, ?, ?, NOW())"
             );
 
-            exit();
+            $stmt->bind_param("ssss", $full_name, $position, $email, $department);
 
-        } else {
+            if ($stmt->execute()) {
+                header("Location: manage_employee.php?message=" . urlencode("Employee added successfully!"));
+                exit();
+            }
 
             $error = "Something went wrong. Please try again.";
-
+            $stmt->close();
         }
-
-        $stmt->close();
     }
 }
 ?>
@@ -84,13 +72,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <nav class="navbar navbar-dark metallic-navbar">
 
-    <div class="container">
+    <div class="container d-flex justify-content-between align-items-center">
 
         <a
             href="index.php"
             class="navbar-brand">
             Employee Management System
         </a>
+
+        <button id="themeToggle" class="theme-toggle" type="button">🌙 Dark</button>
 
     </div>
 
@@ -230,7 +220,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             </div>
 
-            <div class="d-flex gap-2">
+            <div class="d-flex justify-content-end gap-2">
 
                 <button
                     type="submit"
@@ -251,6 +241,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 
 </div>
+
+<script>
+const body = document.body;
+const toggle = document.getElementById('themeToggle');
+
+if (localStorage.getItem('ems-theme') === 'dark') {
+    body.classList.add('dark-theme');
+    toggle.textContent = '☀️ Light';
+}
+
+toggle.addEventListener('click', () => {
+    body.classList.toggle('dark-theme');
+    const darkMode = body.classList.contains('dark-theme');
+    localStorage.setItem('ems-theme', darkMode ? 'dark' : 'light');
+    toggle.textContent = darkMode ? '☀️ Light' : '🌙 Dark';
+});
+</script>
 
 </body>
 </html>
